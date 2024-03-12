@@ -1,6 +1,9 @@
 # pip install langchain
 # pip install langchain-openai
 # pip install python-dotenv
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from dash import Dash, html, dcc, Input, Output
 from dotenv import find_dotenv, load_dotenv
 from langchain_openai import ChatOpenAI
 dotenv_path = find_dotenv()
@@ -12,7 +15,6 @@ load_dotenv(dotenv_path)  # load api key
 # llm = ChatOpenAI(model_name="gpt-4")
 # answer = llm.invoke("Can you tell me about AI's role in the world?")
 # print(answer)
-
 
 
 # Adding Prompts ----------------------------------------------------------
@@ -29,11 +31,7 @@ load_dotenv(dotenv_path)  # load api key
 # print(answer)
 
 
-
 # Create your own ChatGPT -------------------------------------------------
-from dash import Dash, html, dcc, Input, Output
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
 # define the model and chain
 output_parser = StrOutputParser()
@@ -48,19 +46,22 @@ chain = prompt | llm | output_parser
 app = Dash()
 # Define the layout of the app
 app.layout = html.Div([
-    html.Div(children='My LLM App - All About AI'),  # This div will display the app title
+    # This div will display the app title
+    html.Div(children='My LLM App - All About AI'),
     # This input field lets the user type their question or request
-    dcc.Input(id='input-field', type='text', debounce=True, placeholder='Ask a question about AI...', value=None),
+    dcc.Input(id='input-field', type='text', debounce=True,
+              placeholder='Ask a question about AI...', value=None),
     html.Div(id='answer-div', children=''),  # This div will display the answer
 ])
 
 
 @app.callback(
-    Output(component_id='answer-div', component_property='children'),  # The component to update
-    Input(component_id='input-field', component_property='value'),     # The Input component that triggers the update
+    # The component to update
+    Output(component_id='answer-div', component_property='children'),
+    # The Input component that triggers the update
+    Input(component_id='input-field', component_property='value'),
     prevent_initial_call=True
 )
-
 def update_title(user_request):
     answer = chain.invoke({"input": user_request})
     return answer
