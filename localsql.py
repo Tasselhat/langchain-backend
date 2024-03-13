@@ -21,7 +21,8 @@ db = SQLDatabase.from_uri(
     "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
 
 # Point to the local server
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(base_url="http://localhost:1234/v1", api_key="not-needed")
+
 
 execute_query = QuerySQLDataBaseTool(db=db)
 write_query = create_sql_query_chain(llm, db)
