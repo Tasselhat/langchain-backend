@@ -12,10 +12,11 @@ load_dotenv(dotenv_path)  # load api key
 db = SQLDatabase.from_uri(
     "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
 
-llm = ChatOpenAI(model="gpt-4", temperature=0)
+# Point to the local server
+llm = ChatOpenAI(base_url="http://localhost:1234/v1", api_key="not-needed")
 
 agent_executor = create_sql_agent(
-    llm, db=db, agent_type="openai-tools", verbose=True)
+    llm, db=db, agent_type="zero-shot-react-description", verbose=True)
 agent_executor.invoke(
     {
         "input": "Count the total number of rows in every table in the database, and return the results."
