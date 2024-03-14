@@ -20,7 +20,6 @@ load_dotenv(dotenv_path)  # load api key
 db = SQLDatabase.from_uri(
     "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
 
-# Point to the local server
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 execute_query = QuerySQLDataBaseTool(db=db)
@@ -44,5 +43,5 @@ chain = (
 )
 
 response = chain.invoke(
-    {"question": "How many asset labels have an asset label symbol that starts with the letter C?"})
+    {"question": "How many rows does every table in the db have?"})
 print(response)

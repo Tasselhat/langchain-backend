@@ -1,6 +1,8 @@
 import os
+
 from anthropic import Anthropic
 from dotenv import find_dotenv, load_dotenv
+
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)  # load api key
 

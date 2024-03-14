@@ -1,7 +1,7 @@
-from langchain.chains import create_sql_query_chain
-from langchain_openai import ChatOpenAI
-from langchain_community.utilities import SQLDatabase
 from dotenv import find_dotenv, load_dotenv
+from langchain.chains import create_sql_query_chain
+from langchain_community.utilities import SQLDatabase
+from langchain_openai import ChatOpenAI
 
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)  # load api key

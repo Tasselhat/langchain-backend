@@ -45,5 +45,5 @@ chain = (
 )
 
 response = chain.invoke(
-    {"question": "How many asset labels have an asset label symbol that starts with the letter C?"})
+    {"question": "What are the twenty most recently updated asset labels?"})
 print(response)

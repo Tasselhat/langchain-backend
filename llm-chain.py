@@ -1,11 +1,12 @@
 # pip install langchain
 # pip install langchain-openai
 # pip install python-dotenv
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, Input, Output, dcc, html
+from dotenv import find_dotenv, load_dotenv
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from dotenv import find_dotenv, load_dotenv
 from langchain_openai import ChatOpenAI
+
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)  # load api key
 
