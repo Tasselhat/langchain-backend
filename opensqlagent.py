@@ -1,17 +1,12 @@
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    FewShotPromptTemplate,
-    MessagesPlaceholder,
-    PromptTemplate,
-    SystemMessagePromptTemplate,
-)
-from langchain_openai import OpenAIEmbeddings
-from langchain_core.example_selectors import SemanticSimilarityExampleSelector
-from langchain_community.vectorstores import FAISS
 from dotenv import find_dotenv, load_dotenv
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
-from langchain_openai import ChatOpenAI
+from langchain_community.vectorstores import FAISS
+from langchain_core.example_selectors import SemanticSimilarityExampleSelector
+from langchain_core.prompts import (ChatPromptTemplate, FewShotPromptTemplate,
+                                    MessagesPlaceholder, PromptTemplate,
+                                    SystemMessagePromptTemplate)
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)  # load api key

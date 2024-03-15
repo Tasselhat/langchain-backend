@@ -1,10 +1,8 @@
 import os
-
-from anthropic import Anthropic
 from dotenv import find_dotenv, load_dotenv
+from langchain_anthropic import ChatAnthropic
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
-from langchain_anthropic import ChatAnthropic
 
 # Uncomment the below to use LangSmith. Not required.
 # os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
