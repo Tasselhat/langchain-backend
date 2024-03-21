@@ -1,5 +1,3 @@
-from flask import Flask, jsonify
-from flask_cors import CORS, cross_origin
 from flask import jsonify, request
 from flask_cors import cross_origin
 
@@ -13,23 +11,19 @@ from langchain_core.prompts import (ChatPromptTemplate, FewShotPromptTemplate,
                                     SystemMessagePromptTemplate)
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
+from . import open_bp
 
-app = Flask(__name__)
-cors = CORS(app, headers='Content-Type')
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)  # load api key
+# Uncomment the below to use LangSmith. Not required.
+# os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
+# os.environ["LANGCHAIN_TRACING_V2"] = "true"
+db = SQLDatabase.from_uri(
+    "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
 
 
 def agent(input):
-    dotenv_path = find_dotenv()
-    load_dotenv(dotenv_path)  # load api key
-    # Uncomment the below to use LangSmith. Not required.
-    # os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
-    # os.environ["LANGCHAIN_TRACING_V2"] = "true"
-
-    db = SQLDatabase.from_uri(
-        "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
-
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
-
     examples = [
         {"input": "List all artists.", "query": "SELECT * FROM Artist;"},
         {
@@ -120,29 +114,20 @@ def agent(input):
     )
 
     agent_executor = create_sql_agent(
-        llm, db=db, prompt=full_prompt, agent_type="openai-tools", verbose=True)
-    return agent_executor.invoke({"input": input})
+        llm, db=db,
+        prompt=full_prompt, agent_type="openai-tools", verbose=True)
+    agent_executor.invoke({"input": input})
 
 
-@app.route('/test', methods=['POST'])
+@open_bp.route('/message', methods=['POST'])
+@cross_origin()
 def home():
-    return jsonify({'message': 'Hello World!'}), 200
-
-
-@app.route('/test2', methods=['POST'])
-@cross_origin()
-def asdf():
-    return jsonify({'message': 'Hello World!'}), 200
-
-
-@app.route('/message', methods=['POST'])
-@cross_origin()
-def homie():
     data = request.get_json()
     print(data)
     return jsonify(agent(data['input']))
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
-    print("Running on port 5000")
+@open_bp.route('/', methods=['POST'])
+@cross_origin()
+def asdf():
+    return jsonify({'message': 'Hello World!'}), 200
