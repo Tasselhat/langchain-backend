@@ -97,7 +97,7 @@ def agent(input):
 
     DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
 
-    If the question does not seem related to the database, just return "I don't know" as the answer.
+    If the question does not seem related to the database, just return "I'm sorry, I wasn't able to process that request, try rewording the request or providing more detail." as the answer.
 
     Here are some examples of user inputs and their corresponding SQL queries:"""
 
@@ -124,20 +124,9 @@ def agent(input):
     return agent_executor.invoke({"input": input})
 
 
-@app.route('/test', methods=['POST'])
-def home():
-    return jsonify({'message': 'Hello World!'}), 200
-
-
-@app.route('/test2', methods=['POST'])
-@cross_origin()
-def asdf():
-    return jsonify({'message': 'Hello World!'}), 200
-
-
 @app.route('/message', methods=['POST'])
 @cross_origin()
-def homie():
+def process_agent_message():
     data = request.get_json()
     print(data)
     return jsonify(agent(data['input']))
