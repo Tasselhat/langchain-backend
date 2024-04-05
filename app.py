@@ -1,11 +1,16 @@
 from dotenv import find_dotenv, load_dotenv
+import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
-
-from langchain.chains import (create_history_aware_retriever,
+from langchain.chains import (ConversationalRetrievalChain,
+                              create_history_aware_retriever,
                               create_retrieval_chain)
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import (HuggingFaceInstructEmbeddings,
+                                            OpenAIEmbeddings)
+from langchain.memory import ConversationBufferMemory
+from langchain.text_splitter import (CharacterTextSplitter,
+                                     RecursiveCharacterTextSplitter)
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.utilities import SQLDatabase
@@ -16,6 +21,7 @@ from langchain_core.prompts import (ChatPromptTemplate, FewShotPromptTemplate,
                                     MessagesPlaceholder, PromptTemplate,
                                     SystemMessagePromptTemplate)
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from PyPDF2 import PdfReader
 
 app = Flask(__name__)
 cors = CORS(app, headers='Content-Type')
@@ -79,6 +85,35 @@ def get_conversational_chain_no_rag():
     chain = prompt | llm | output_parser
 
     return chain
+
+
+@app.route('/websitechat', methods=['POST'])
+@cross_origin()
+def get_response():
+    data = request.get_json()
+    website_url = data['websiteURL']
+    if website_url:
+        vector_store = get_vectorstore_from_url(website_url)
+        retriever_chain = get_context_retriever_chain(vector_store)
+        conversation_rag_chain = get_conversational_rag_chain(retriever_chain)
+
+        response = conversation_rag_chain.invoke({
+            "chat_history": data['messages'],
+            "input": data['input']
+        })
+
+        print(response)
+
+        return jsonify(response['answer'])
+    else:
+        chain = get_conversational_chain_no_rag()
+
+        response = chain.invoke({
+            "chat_history": data['messages'],
+            "input": data['input']
+        })
+
+        return jsonify(response)
 
 
 def agent(input):
@@ -195,33 +230,84 @@ def process_agent_message():
     return jsonify(agent(data['input']))
 
 
-@app.route('/websitechat', methods=['POST'])
+def get_pdf_text(pdf_docs):
+    text = ""
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+
+
+def get_text_chunks(text):
+    text_splitter = CharacterTextSplitter(
+        separator="\n",
+        chunk_size=2000,
+        chunk_overlap=200,
+        length_function=len
+    )
+    chunks = text_splitter.split_text(text)
+    return chunks
+
+
+def get_vectorstore(text_chunks):
+    embeddings = OpenAIEmbeddings()
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
+# def get_conversation_chain(vectorstore):
+#     llm = ChatOpenAI()
+#     # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+
+#     prompt = ChatPromptTemplate.from_messages([
+#         MessagesPlaceholder(variable_name="chat_history"),
+#         ("user", "{input}"),
+#     ])
+
+#     memory = ConversationBufferMemory(
+#         memory_key='chat_history', return_messages=True)
+#     conversation_chain = ConversationalRetrievalChain.from_llm(
+#         llm=llm,
+#         retriever=vectorstore.as_retriever(),
+#         memory=memory
+#     )
+#     return conversation_chain
+
+
+@app.route('/pdfchat', methods=['POST'])
 @cross_origin()
-def get_response():
-    data = request.get_json()
-    website_url = data['websiteURL']
-    if website_url:
-        vector_store = get_vectorstore_from_url(website_url)
-        retriever_chain = get_context_retriever_chain(vector_store)
-        conversation_rag_chain = get_conversational_rag_chain(retriever_chain)
+def get_chat_response():
+    # Files are accessed through request.files, not get_json()
+    pdf_files = request.files.getlist(
+        'pdf_docs')  # This is how you access files
 
-        response = conversation_rag_chain.invoke({
-            "chat_history": data['messages'],
-            "input": data['input']
-        })
+    # If you have other non-file fields that were appended to FormData
+    user_input = request.form.get('input')
+    # This will be a JSON string if you sent it as such
+    messages_json = request.form.get('messages')
 
-        print(response)
-
-        return jsonify(response['answer'])
+    if messages_json:
+        try:
+            messages = json.loads(messages_json)
+            # Now `messages` is a Python list that you can pass to your langchain
+        except json.JSONDecodeError as error:
+            return {'error': 'Invalid JSON format for messages'}, 400
     else:
-        chain = get_conversational_chain_no_rag()
+        return {'error': 'Messages are required'}, 400
 
-        response = chain.invoke({
-            "chat_history": data['messages'],
-            "input": data['input']
-        })
+    raw_text = get_pdf_text(pdf_files)
+    text_chunks = get_text_chunks(raw_text)
+    vectorstore = get_vectorstore(text_chunks)
+    retriever_chain = get_context_retriever_chain(vectorstore)
+    conversation_rag_chain = get_conversational_rag_chain(retriever_chain)
+    response = conversation_rag_chain.invoke({
+        "chat_history": messages,
+        "input": user_input,
+    })
 
-        return jsonify(response)
+    print(response)
+    return jsonify(response['answer'])
 
 
 if __name__ == "__main__":
