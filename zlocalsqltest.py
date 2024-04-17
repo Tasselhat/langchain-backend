@@ -1,3 +1,4 @@
+import os
 from dotenv import find_dotenv, load_dotenv
 from langchain.chains import create_sql_query_chain
 from langchain_community.utilities import SQLDatabase
@@ -6,9 +7,9 @@ from langchain_openai import ChatOpenAI
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)  # load api key
 
+database_uri = os.getenv("DATABASE_URI")
 
-db = SQLDatabase.from_uri(
-    "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
+db = SQLDatabase.from_uri(database_uri)
 
 print(db.dialect)
 print(db.get_usable_table_names())

@@ -1,3 +1,4 @@
+import os
 from dotenv import find_dotenv, load_dotenv
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
@@ -14,8 +15,9 @@ load_dotenv(dotenv_path)  # load api key
 # os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
 # os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
-db = SQLDatabase.from_uri(
-    "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
+database_uri = os.getenv("DATABASE_URI")
+
+db = SQLDatabase.from_uri(database_uri)
 
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
 

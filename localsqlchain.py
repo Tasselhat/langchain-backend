@@ -1,5 +1,5 @@
+import os
 from operator import itemgetter
-
 from dotenv import find_dotenv, load_dotenv
 from langchain.chains import create_sql_query_chain
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
@@ -16,9 +16,9 @@ load_dotenv(dotenv_path)  # load api key
 # os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
 # os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
+database_uri = os.getenv("DATABASE_URI")
 
-db = SQLDatabase.from_uri(
-    "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
+db = SQLDatabase.from_uri(database_uri)
 
 # Point to the local server
 llm = ChatOpenAI(base_url="http://localhost:1234/v1", api_key="not-needed")

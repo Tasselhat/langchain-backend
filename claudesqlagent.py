@@ -12,9 +12,10 @@ load_dotenv(dotenv_path)  # load api key
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
+database_uri = os.getenv("DATABASE_URI")
 
-db = SQLDatabase.from_uri(
-    "mysql+pymysql://root:Peanutbutter11@localhost:3306/goals_app")
+db = SQLDatabase.from_uri(database_uri)
+
 llm = ChatAnthropic(
     model="claude-3-opus-20240229"
 )
