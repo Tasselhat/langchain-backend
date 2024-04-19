@@ -11,8 +11,7 @@ from langchain.text_splitter import (CharacterTextSplitter,
                                      RecursiveCharacterTextSplitter)
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.document_loaders import WebBaseLoader
-from langchain_community.embeddings import (HuggingFaceInstructEmbeddings,
-                                            OpenAIEmbeddings)
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.utilities import SQLDatabase
 from langchain_community.vectorstores import FAISS, Chroma
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
@@ -261,7 +260,6 @@ def get_vectorstore(text_chunks):
 @app.route('/pdfchat', methods=['POST'])
 @cross_origin()
 def get_chat_response():
-    # Files are accessed through request.files, not get_json()
     pdf_files = request.files.getlist(
         'pdf_docs')  # This is how you access files
 
