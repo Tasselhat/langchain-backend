@@ -117,6 +117,6 @@ agent_executor = create_sql_agent(
     prompt=full_prompt, agent_type="openai-tools", verbose=True)
 agent_executor.invoke(
     {
-        "input": "Count the total number of rows in every table in the database, and return the results."
+        "input": "What are the twenty most recently updated asset labels, return results of the query."
     }
 )

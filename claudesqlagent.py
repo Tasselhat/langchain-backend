@@ -24,6 +24,6 @@ agent_executor = create_sql_agent(
     llm, db=db, agent_type="zero-shot-react-description", verbose=True)
 agent_executor.invoke(
     {
-        "input": "Count the total number of rows in each table in the database"
+        "input": "What are the twenty most recently updated asset labels, return results of the query."
     }
 )

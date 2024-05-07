@@ -23,6 +23,6 @@ agent_executor = create_sql_agent(
 
 agent_executor.invoke(
     {
-        "input": "Describe the asset_labels table."
+        "input": "What are the twenty most recently updated asset labels, return results of the query."
     }
 )
